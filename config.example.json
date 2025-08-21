@@ -1,0 +1,15 @@
+{
+  "extensions": [".py", ".js", ".ts", ".go", ".rs"],
+  "exclude_dirs": [
+    "node_modules", "dist", "build", "__pycache__", 
+    ".git", ".vscode", "vendor", "target"
+  ],
+  "exclude_patterns": [
+    "*.test.js", "*.spec.ts", "*.min.*", 
+    "*.bundle.*", "*.generated.*"
+  ],
+  "max_size": 3.0,
+  "max_tokens": 15000,
+  "output": "my_project_analysis",
+  "debug": false
+}

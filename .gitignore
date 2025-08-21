@@ -54,13 +54,32 @@ coverage.xml
 # Generated Markdown summary files
 codesnap_part_*.md
 
+# CodeSnap specific temp directories
+codesnap_temp/
+git_repo_temp/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Testing
+.pytest_cache/
+
 # Editor / IDE settings
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.swp
+*.swo
+*~
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-github_repo_temp/

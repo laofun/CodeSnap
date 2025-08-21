@@ -1,96 +1,359 @@
-# CodeSnap
-A Python tool to quickly capture a Markdown summary of source code and project structure from a folder or Git repository. It delivers:
+# CodeSnap 2.0 🚀
 
-- **File Content**: Code files in neat blocks, Markdown files as plain text.
-- **Project Structure**: A tree-style overview in a Markdown code block.
-- **Multi-Part Output**: Splits large summaries into manageable files if over 10,000 tokens, with instructions and structure in the first part.
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Type checked with mypy](https://img.shields.io/badge/mypy-checked-blue)](https://mypy.readthedocs.io/)
 
-## Features
+> Professional code analysis and documentation generator for AI-assisted development
 
-- **Fast Scanning**: Explores local folders or Git repos (via shallow clone) for specified file types.
-- **File Control**: Filters by extensions, skips unwanted directories or files.
-- **Parallel Processing**: Uses multiprocessing with a `tqdm` progress bar for speed.
-- **Customizable**: Tweak output name, extensions, exclusions, size, and token limits via flags or JSON config.
-- **AI-Friendly**: Separates files with `---` dividers for easy parsing.
-- **Logging**: Records actions in `codesnap.log` and console, with optional debug mode.
-- **Rich Display**: Optional `rich` library for enhanced console output.
-- **Test Mode**: Preview project structure with `--test`.
+CodeSnap transforms your codebase into comprehensive Markdown summaries, perfect for AI code analysis, documentation, and project understanding. Built with modern Python practices and enterprise-grade architecture.
 
-## Requirements
+## ✨ Key Features
 
-- Python 3.6+
-- Required: `tqdm` (progress bar)
-- Optional: `rich` (console styling)
+- **🔍 Intelligent Scanning** - Smart file discovery with advanced filtering
+- **⚡ Lightning Fast** - Parallel processing with beautiful progress tracking  
+- **🎯 Highly Configurable** - JSON configs + CLI overrides for maximum flexibility
+- **📁 Git Native** - Clone and analyze any repository instantly
+- **🎨 Beautiful Output** - Rich console formatting and structured Markdown
+- **🧪 Test Mode** - Preview project structure before processing
+- **🛡️ Type Safe** - Full type hints and validation throughout
+- **🔧 Developer Friendly** - Comprehensive test suite and modern tooling
 
-Install:
+## 🏃‍♂️ Quick Start
+
+### Installation
+
+**Prerequisites**: Python 3.8+ required
+
 ```bash
-pip install tqdm rich
+# Clone the repository
+git clone https://github.com/laofun/CodeSnap.git
+cd codesnap
+
+# Install for regular use
+pip install -e .
+
+# Install for development (includes dev dependencies)
+make dev-setup
+
+# Verify installation
+codesnap --version
 ```
 
-## Usage
+### Basic Usage
 
-Snap a local folder or Git repo with ease.
-
-### Local Folder
 ```bash
-python codesnap.py /path/to/project
+# Analyze local project
+codesnap /path/to/your/project
+
+# Analyze GitHub repository
+codesnap --repo https://github.com/laofun/CodeSnap.git
+
+# Preview structure only
+codesnap --test /path/to/project
+
+# Custom output name
+codesnap /path/to/project -o my_analysis
 ```
 
-### Git Repository
-Clone and summarize:
+## 📖 Usage Examples
+
+### Analyze Different Project Types
+
 ```bash
-python codesnap.py --repo https://github.com/username/repo.git
+# Python project
+codesnap /path/to/python-project -e .py .pyi -x tests __pycache__
+
+# JavaScript/TypeScript project  
+codesnap /path/to/web-project -e .js .ts .jsx .tsx -x node_modules dist
+
+# Go project
+codesnap /path/to/go-project -e .go -x vendor
+
+# Multi-language project
+codesnap /path/to/project -e .py .js .go .rs .java
 ```
 
-### Options
+### Advanced Configuration
 
-- **folder**: Path to scan (optional, ignored with `--repo`).
-- `-o, --output`: Output file base name (default: `codesnap`).
-- `-e, --extensions`: File extensions to include (e.g., `.py .js`).
-- `-x, --exclude`: Directories to skip (adds to defaults: `node_modules`, `.git`, `__pycache__`, `.vscode`, `.github`, `mocks`).
-- `-f, --exclude-files`: Files to ignore by name (e.g., `README.md .gitignore`).
-- `-m, --max-size`: Max file size in MB (default: 1).
-- `-t, --max-tokens`: Max tokens per file (default: 10,000).
-- `-c, --config`: JSON config file path.
-- `-r, --repo`: Git repo URL to clone and scan.
-- `-n, --no-subfolders`: Limit scan to root folder.
-- `--test`: Display project structure and exit.
-- `--debug`: Enable detailed logging.
-
-## Customization
-
-### Command-Line Example
-Skip subfolders and specific files:
 ```bash
-python codesnap.py /path/to/project --no-subfolders -f README.md -e .py .md
+# Custom token limits and file size
+codesnap /path/to/project -t 20000 -m 5.0
+
+# Exclude specific patterns
+codesnap /path/to/project -p "*.test.js" -p "*.spec.ts" -p "*.min.*"
+
+# Debug mode with detailed logging
+codesnap --debug /path/to/project
+
+# No subdirectories (root level only)
+codesnap --no-subfolders /path/to/project
 ```
 
-### Optional Config File
-Create a `config.json` (optional):
+## ⚙️ Configuration
+
+### Command Line Options
+
+```
+codesnap [FOLDER] [OPTIONS]
+
+POSITIONAL ARGUMENTS:
+  folder                    Local folder path to analyze
+
+CORE OPTIONS:
+  -r, --repo URL           Git repository URL to clone and analyze
+  -o, --output NAME        Output file base name (default: codesnap)
+  -c, --config FILE        JSON configuration file path
+
+FILE FILTERING:
+  -e, --extensions EXT     File extensions to include (.py .js .ts)
+  -x, --exclude-dirs DIR   Additional directories to exclude  
+  -p, --exclude-patterns   File patterns to exclude (supports wildcards)
+  -f, --exclude-files FILE Specific filenames to exclude
+  -m, --max-size MB        Maximum file size in MB (default: 2.0)
+
+OUTPUT CONTROL:
+  -t, --max-tokens NUM     Maximum tokens per output part (default: 12000)
+  -n, --no-subfolders      Only scan top-level directory
+
+UTILITY:
+  --test                   Show project structure and exit
+  --debug                  Enable detailed debug logging
+  --version                Show version information
+  -h, --help               Show help message
+```
+
+### JSON Configuration
+
+Create a `config.json` for reusable settings:
+
 ```json
 {
-  "output": "my_snap",
-  "extensions": [".py", ".md"],
-  "exclude": ["tests"],
-  "exclude_files": ["LICENSE"],
-  "max_size": 2,
-  "max_tokens": 5000
+  "extensions": [".py", ".js", ".ts", ".go", ".rs"],
+  "exclude_dirs": [
+    "node_modules", "dist", "build", "__pycache__", 
+    ".git", ".vscode", "vendor", "target"
+  ],
+  "exclude_patterns": [
+    "*.test.js", "*.spec.ts", "*.min.*", 
+    "*.bundle.*", "*.generated.*"
+  ],
+  "max_size": 3.0,
+  "max_tokens": 15000,
+  "output": "my_project_analysis",
+  "debug": false
 }
 ```
-Run with:
+
+Use configuration file:
 ```bash
-python codesnap.py --repo https://github.com/username/repo.git --config config.json
+codesnap --config config.json /path/to/project
 ```
-Or use flags directly without a config file.
 
-## How It Works
+## 📁 Output Structure
 
-1. **Scan**: Grabs files from a folder or cloned repo, filtering by extensions and exclusions.
-2. **Process**: Formats file contents—Markdown as text, others in code blocks—within size limits.
-3. **Structure**: Builds a project tree, using the repo name if provided.
-4. **Split**: Divides output into parts if over the token limit, with `---` separators.
-5. **Save**: Creates Markdown files with AI-ready instructions.
+CodeSnap generates structured Markdown files:
 
-## License
+```
+my_project_part_1.md     # Main analysis with project structure
+my_project_part_2.md     # Continuation (if needed)
+my_project_part_N.md     # Additional parts for large projects
+```
 
-MIT License
+Each output includes:
+- **AI Processing Instructions** - Clear guidance for AI analysis
+- **Project Structure Tree** - Visual directory layout  
+- **File Contents** - Organized code with syntax highlighting
+- **Metadata** - Timestamps, repository info, generation details
+
+## 🏗️ Architecture
+
+CodeSnap 2.0 features a clean, modular architecture:
+
+```
+codesnap/
+├── core/                 # Core functionality
+│   ├── scanner.py       # File discovery and filtering
+│   ├── processor.py     # Parallel file processing
+│   ├── formatter.py     # Markdown output generation
+│   └── git_handler.py   # Git repository operations
+├── config/              # Configuration management
+│   ├── settings.py      # Configuration classes
+│   └── validator.py     # Input validation
+├── utils/               # Shared utilities
+│   ├── exceptions.py    # Custom exception types
+│   └── logger.py        # Professional logging
+├── tests/               # Comprehensive test suite
+└── cli.py               # Command-line interface
+```
+
+## 📦 Dependencies
+
+### Core Requirements
+- **Python 3.8+** - Modern Python version
+- **tqdm** - Progress bars and terminal output
+- **rich** (optional) - Enhanced console formatting
+
+### Development Dependencies
+- **pytest** - Testing framework
+- **pytest-cov** - Coverage reporting
+- **black** - Code formatting
+- **isort** - Import sorting
+- **mypy** - Static type checking
+- **flake8** - Linting
+
+Install all dependencies:
+```bash
+# Production dependencies
+pip install -r requirements.txt
+
+# Development dependencies  
+pip install -r requirements-dev.txt
+```
+
+## 🛠️ Development
+
+### Setup Development Environment
+
+```bash
+# Clone and setup
+git clone https://github.com/laofun/CodeSnap.git
+cd codesnap
+make dev-setup
+
+# Verify installation
+make check
+```
+
+### Development Commands
+
+```bash
+# Testing
+make test              # Run test suite
+make test-cov          # Run tests with coverage report
+
+# Code Quality
+make lint              # Run flake8 linting
+make format            # Format code with black + isort
+make type-check        # Run mypy type checking
+make check             # Run all quality checks
+
+# Build & Distribution
+make build             # Build distribution packages
+make clean             # Clean build artifacts
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+python -m pytest
+
+# Run with coverage
+python -m pytest --cov=codesnap --cov-report=html
+
+# Run specific test file
+python -m pytest codesnap/tests/test_scanner.py
+```
+
+## 🎯 Use Cases
+
+- **🤖 AI Code Analysis** - Generate comprehensive summaries for ChatGPT, Claude, etc.
+- **📚 Documentation** - Create project overviews and onboarding materials
+- **🔍 Code Review** - Understand large codebases quickly
+- **📊 Project Assessment** - Analyze structure and complexity
+- **🔄 Migration Planning** - Document legacy systems before refactoring
+- **🎓 Learning** - Explore open source projects systematically
+
+## 🚀 Performance
+
+- **Parallel Processing** - Utilizes all CPU cores for file processing
+- **Smart Filtering** - Efficient exclusion of unwanted files and directories
+- **Memory Efficient** - Streams large files without loading everything into memory
+- **Progress Tracking** - Real-time progress bars with ETA
+- **Incremental Output** - Splits large projects into manageable parts
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**Command not found: `codesnap`**
+```bash
+# Make sure you installed the package
+pip install -e .
+
+# Or check if it's in your PATH
+python -m codesnap.cli --help
+```
+
+**Import errors or module not found**
+```bash
+# Reinstall dependencies
+pip install -r requirements.txt
+
+# For development
+make dev-setup
+```
+
+**Permission denied when cloning repositories**
+```bash
+# Make sure you have git installed
+git --version
+
+# Check SSH keys for private repos
+ssh -T git@github.com
+```
+
+**Large files causing memory issues**
+```bash
+# Reduce file size limit
+codesnap /path/to/project --max-size 1.0
+
+# Exclude large directories
+codesnap /path/to/project -x node_modules dist build
+```
+
+**Getting help**
+```bash
+# Show all available options
+codesnap --help
+
+# Enable debug mode for detailed logs
+codesnap --debug /path/to/project
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how to get started:
+
+1. **Fork** the repository
+2. **Clone** your fork locally
+3. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+4. **Make** your changes
+5. **Test** your changes (`make check`)
+6. **Commit** with clear messages (`git commit -m 'Add amazing feature'`)
+7. **Push** to your branch (`git push origin feature/amazing-feature`)
+8. **Create** a Pull Request
+
+### Development Guidelines
+
+- Write comprehensive tests for new features
+- Follow existing code style (black + isort)
+- Add type hints for all new code
+- Update documentation for user-facing changes
+- Ensure all quality checks pass (`make check`)
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with modern Python best practices
+- Inspired by the need for better AI-assisted code analysis
+- Thanks to the open source community for excellent tools and libraries
+
+---
+
+**Made with ❤️ for developers who love clean code and powerful tools**
